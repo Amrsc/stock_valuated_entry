@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+                <menuitem name="Entrées valorisées" id="menu_stock_valuated_entry" sequence="80" parent="stock.menu_stock_warehouse_mgmt" groups="stock.group_stock_user"
+                          action="action_stock_valuated_entry_tree_view"/>
+
+
+    </data>
+</openerp>

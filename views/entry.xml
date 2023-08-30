@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+
+    <!-- superficie -->
+    <record model="ir.ui.view" id="stock_valuated_entry_line_tree_view">
+        <field name="name">stock.valuated.entry.line.tree</field>
+        <field name="model">stock.valuated.entry.line</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="entry_id" />
+                <field name="name"/>
+                <field name="num_lot" />
+                <field name="qty" decoration-bf="1"/>
+                <field name="valeur" decoration-bf="1"/>
+                <field name="qty_existante" decoration-bf="1"/>
+                <field name="date_peremption"/>
+                <field name="price_ppa"/>
+                <field name="price_grossiste"/>
+                <field name="price_unit"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="stock_valuated_entry_line_form_view">
+        <field name="name">valuated.entry</field>
+        <field name="model">stock.valuated.entry.line</field>
+        <field name="arch" type="xml">
+            <form string="Entree stock line">
+
+                <sheet>
+                    <h1>
+                        <label for="name" string="Produit #"/>
+                        <field name="name" options="{'no_open': True, 'no_create': True}"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="purchase_ok" invisible="1"/>
+                            <field name="num_lot"  />
+                            <field name="product_id" invisible="1" />
+                            <field name="qty"/>
+                            <field name="valeur"/>
+                            <field name="date_peremption"/>
+                        </group>
+                        <group>
+                            <field name="price_ppa" />
+                            <field name="price_grossiste" />
+                            <field name="price_unit" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+        <record id="action_stock_valuated_entry_line_button" model="ir.actions.act_window">
+            <field name="name">Lignes Entrée valorisée</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.valuated.entry.line</field>
+            <field name="context">{'search_default_entry_id': [active_id], 'default_entry_id': active_id}</field>
+            <field name="domain">[('entry_id', '=', active_id)]</field>
+            <field name="view_mode">tree,form</field>
+<!--            <field name="search_view_id" ref="view_crm_echeancier_filter"/>-->
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Aucune information a afficher.
+              </p><p>
+              </p>
+            </field>
+        </record>
+
+    <!-- superficie -->
+    <record model="ir.ui.view" id="stock_valuated_entry_tree_view">
+        <field name="name">stock.valuated.entry.tree</field>
+        <field name="model">stock.valuated.entry</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-muted="state == 'cancel'" >
+                <field name="name"/>
+                <field name="date"/>
+                <field name="depot_id"/>
+                <field name="location_id"/>
+                <field name="operation_id"/>
+                <field name="picking_id"/>
+                <field name="state" widget="badge" decoration-danger="state == 'draft'" decoration-success="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="stock_valuated_entry_form_view">
+        <field name="name">valuated.entry</field>
+        <field name="model">stock.valuated.entry</field>
+        <field name="arch" type="xml">
+            <form string="valuated.entry">
+                <header>
+                    <button name="create_picking" string="Valider l'entrée" class="oe_highlight" states="draft" type="object" confirm="Voulez-vous valider cette opération ?"/>
+
+
+<!--                    <button name="action_validate" string="Valider l'entrée" class="oe_highlight" states="draft" type="object"-->
+<!--                    confirm="Voulez-vous valider cette opération ?"/>-->
+
+                    <button name="action_cancel" string="Annuler" states="draft,progress" type="object" confirm="Voulez-vous annuler l'opération ?"/>
+                    <button name="action_draft" string="Remettre dans l'état brouillon" states="cancel" type="object" />
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+<!--                    <div class="oe_button_box" name="button_box">-->
+<!--                        <button class="oe_stat_button" type="action" name="%(action_stock_valuated_entry_line_button)d"-->
+<!--                                icon="fa-star">-->
+<!--                            <span>Lignes entrée</span>-->
+<!--                        </button>-->
+<!--                    </div>-->
+
+                    <h1>
+                        <label for="name" string="Entrée stock #"/>
+                        <field name="name"/>
+                        <button name="action_validation" string="Valoriser l'entrée" class="oe_highlight" states="progress" type="object"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="date" />
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" string ="Partener" options="{ 'no_create': True}"/>
+                            <field name="depot_id" options="{'no_open': True, 'no_create': True}"/>
+                            <field name="operation_id" options="{'no_open': True, 'no_create': True}" domain="[('warehouse_id', '=', depot_id), ('code', '=', 'incoming'), ('id', '!=', '33'), ('id', '>', '1'),('company_id', '=', company_id)]"/>
+                            <field name="location_id" domain="[('entrepot_id', '=', depot_id)]" options="{'no_open': True, 'no_create': True}"/>
+                            <field name="picking_id" attrs="{'invisible': [('picking_id', '=', False)]}"/>
+                            <div class="alert alert-info" role="alert" style="height: 40px; margin-bottom:0px; background-color:#F7C9CB" attrs="{'invisible': [('state', '!=', 'progress')]}">
+                                <strong>L'entrée en stock n'est pas encore validée, veuillez la valider manuellement puis cliquer sur le bouton valoriser l'entrée</strong>.
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Produits">
+                            <field name="stock_ids">
+                                <tree editable="bottom">
+<!--                                    <field name="entry_id" />-->
+                                    <field name="name"/>
+                                    <field name="num_lot"  />
+                                    <field name="qty" decoration-bf="1"/>
+                                    <field name="uom_id"/>
+                                    <field name="valeur" decoration-bf="1" invisible = "1"/>
+<!--                                    <field name="qty_existante" decoration-bf="1"/>-->
+                                    <field name="date_peremption"/>
+                                    <field name="price_ppa" invisible = "1"/>
+                                    <field name="price_grossiste" invisible = "1"/>
+                                    <field name="price_unit" invisible = "1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_stock_valuated_entry_tree_view">
+        <field name="name">Entrées Stock</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.valuated.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="stock_valuated_entry_tree_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Cliquez ici pour créer un nouvelle entrée en stock
+            </p><p>
+
+            </p><p>
+
+            </p>
+         </field>
+    </record>
+
+
+        <record id="view_stock_valuated_entry_filter" model="ir.ui.view">
+            <field name="name">stock.valuated.entry.search.view</field>
+            <field name="model">stock.valuated.entry</field>
+            <field name="arch" type="xml">
+                <search string="stock entry Search">
+             <!-- permet une recherche "directe" -->
+                     <group col="10" colspan="4">
+                        <field name="name"/>
+                        <field name="date"/>
+
+                    </group>
+                    <filter name="draft" string="Nouveaux" domain="[('state', '=', 'draft')]"/>
+<!--                    <filter name="progress" string="En cours" domain="[('state', '=', 'progress')]"/>-->
+                    <filter name="valid" string="Validés" domain="[('state', '=', 'done')]"/>
+                    <filter name="cancel" string="Annulés" domain="[('state', '=', 'cancel')]"/>
+                    <!-- Permet le regroupement -->
+                    <separator/>
+<!--                    <group expand="0" string="Grouper par" >-->
+<!--                        <filter string="Commercial" name="commercial_id" context="{'group_by':'commercial_id'}" />-->
+<!--                        <filter string="Chargé du recouverement" name="charge_recouv_id" context="{'group_by':'charge_recouv_id'}" />-->
+<!--                    </group>-->
+<!--                    <separator/>-->
+                     <!-- permet un filtrage -->
+                </search>
+            </field>
+        </record>
+
+
+    </data>
+</openerp>
